@@ -58,7 +58,7 @@ echo "挂载完成。"
 # 安装 Samba 和 cifs-utils
 echo "== 安装 Samba 和 cifs-utils =="
 sudo -E apt update
-sudo -E apt install -y samba cifs-utils
+sudo -E apt install -y samba cifs-utils git
 
 # 设置 Samba 用户密码
 echo "设置 Samba 密码..."
