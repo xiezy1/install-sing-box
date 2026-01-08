@@ -50,6 +50,10 @@ sudo -E wget https://raw.githubusercontent.com/xiezy1/install-sing-box/main/base
 sudo -E wget https://raw.githubusercontent.com/xiezy1/install-sing-box/main/ggggg.js -O /etc/sing-box/ggggg.js
 sudo -E wget https://raw.githubusercontent.com/xiezy1/install-sing-box/main/update_subscript.sh -O /etc/sing-box/update_subscript.sh
 
+# 赋予执行权限
+echo "Setting execute permissions..."
+chmod +x /etc/sing-box/update_subscript.sh
+
 # 重新加载 systemd 配置
 echo "Reloading systemd configuration..."
 systemctl daemon-reload
