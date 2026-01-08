@@ -1,15 +1,21 @@
 #!/bin/bash
 export http_proxy="http://192.168.66.181:10808" 
 export https_proxy="http://192.168.66.181:10808"
+
 # 更新 apt 索引
 echo "Updating apt index..."
-sudo -E apt update
+sudo -E apt update && apt install nodejs npm -y
 
-# 安装 Sing-Box
-echo "Installing Sing-Box..."
-# 下载 Sing-Box 安装包 (注意替换为需要的版本和架构)
-sudo -E wget https://github.com/SagerNet/sing-box/releases/download/v1.12.15/sing-box_1.12.15_linux_arm64.deb -O /tmp/sing-box_1.12.15_linux_arm64.deb
-sudo -E apt install -y /tmp/sing-box_1.12.15_linux_arm64.deb
+# 检查 Sing-Box 是否已经安装
+if command -v sing-box &> /dev/null; then
+    echo "Sing-Box is already installed, skipping installation."
+else
+    # 安装 Sing-Box
+    echo "Installing Sing-Box..."
+    # 下载 Sing-Box 安装包 (注意替换为需要的版本和架构)
+    sudo -E wget https://github.com/SagerNet/sing-box/releases/download/v1.12.15/sing-box_1.12.15_linux_arm64.deb -O /tmp/sing-box_1.12.15_linux_arm64.deb
+    sudo -E apt install -y /tmp/sing-box_1.12.15_linux_arm64.deb
+fi
 
 # 创建 Sing-Box 服务文件
 echo "Creating Sing-Box service file..."
