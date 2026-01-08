@@ -19,3 +19,5 @@ sudo wget https://raw.githubusercontent.com/xiezy1/install-sing-box/main/setup.s
 sudo chmod +x setup.sh && \
 sudo ./setup.sh
 ```
+
+
