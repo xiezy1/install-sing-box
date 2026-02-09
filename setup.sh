@@ -7,52 +7,43 @@ export https_proxy="http://192.168.66.181:10808"
 
 # 挂载分区
 echo "== 准备挂载 NTFS 分区: /dev/nvme0n1p1 -> /mnt/nvme =="
-DEVICE=/dev/nvme0n1p1
-MOUNT_POINT=/mnt/nvme
+DEV="/dev/nvme0n1p1"
+MOUNT_POINT="/mnt/nvme"
+FS_TYPE="exfat"
 
-command -v ntfs-3g >/dev/null 2>&1 || {
-    echo "安装 ntfs-3g..."
-    sudo -E apt-get update
-    sudo -E apt-get install -y ntfs-3g
-}
-
-sudo -E mkdir -p "$MOUNT_POINT"
-
-[ -b "$DEVICE" ] || {
-    echo "设备不存在: $DEVICE"
+# 检查设备
+if [ ! -b "$DEV" ]; then
+    echo "Device not found: $DEV"
     exit 1
-}
-
-if mountpoint -q "$MOUNT_POINT"; then
-    echo "已挂载，跳过。"
-else
-    echo "使用 ntfs-3g 挂载..."
-    sudo -E ntfs-3g "$DEVICE" "$MOUNT_POINT" -o noatime || {
-        echo "挂载失败，可能是 NTFS dirty bit（Windows 未正常关机）"
-        exit 1
-    }
 fi
 
-UUID=$(blkid -s UUID -o value "$DEVICE")
-[ -n "$UUID" ] || {
-    echo "无法获取 UUID，跳过 fstab"
-    exit 0
-}
+# 获取 UUID
+UUID=$(blkid -s UUID -o value "$DEV")
 
-FSTAB_LINE="UUID=$UUID $MOUNT_POINT ntfs-3g defaults,noatime,nofail,x-systemd.device-timeout=10 0 0"
-
-if grep -q "^UUID=$UUID " /etc/fstab; then
-    echo "fstab 已存在对应 UUID，跳过"
-else
-    echo "写入 /etc/fstab："
-    echo "  $FSTAB_LINE"
-    sudo -E cp /etc/fstab /etc/fstab.bak
-    echo "$FSTAB_LINE" | sudo -E tee -a /etc/fstab >/dev/null
+if [ -z "$UUID" ]; then
+    echo "Cannot get UUID"
+    exit 1
 fi
 
-echo "验证 fstab（不因失败退出）..."
-sudo -E mount -a || true
-df -h "$MOUNT_POINT"
+# 创建挂载目录
+mkdir -p "$MOUNT_POINT"
+
+# 删除旧配置
+sed -i "\|$MOUNT_POINT|d" /etc/fstab
+sed -i "\|$UUID|d" /etc/fstab
+
+# 写入 fstab
+echo "UUID=$UUID  $MOUNT_POINT  $FS_TYPE  defaults,nofail  0  0" >> /etc/fstab
+
+# 重载 systemd
+systemctl daemon-reload
+
+# 测试挂载
+umount "$MOUNT_POINT" 2>/dev/null
+mount -a
+
+# 显示结果
+df -h | grep "$MOUNT_POINT" && echo "Mount OK"
 echo "挂载完成。"
 
 # 安装 Samba 和 cifs-utils

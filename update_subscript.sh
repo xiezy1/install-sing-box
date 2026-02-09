@@ -3,7 +3,7 @@ set -euo pipefail
 # 这里替换自己的订阅地址
 VAR1=$(curl -s https://example.com/your-subscription-url)
 
-node ggggg.js "$VAR1"
+node ggggg.js "$VAR1" "/etc/sing-box/subscript/node.json"
 command -v iconv >/dev/null 2>&1 || { echo "需要 iconv" >&2; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo "需要 jq" >&2; exit 1; }
 command -v sing-box >/dev/null 2>&1 || echo "警告：未检测到 sing-box 可执行，合并步骤可能失败" >&2
